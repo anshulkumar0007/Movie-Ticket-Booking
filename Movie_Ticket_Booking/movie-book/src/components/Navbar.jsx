@@ -1,0 +1,68 @@
+import React, { useState } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { assets } from '../assets/assets';
+import { XIcon, MenuIcon, User, TicketPlus } from 'lucide-react';
+import { useClerk, UserButton, useUser} from '@clerk/clerk-react' 
+import { useAppContext } from '../context/AppContext';
+
+const Navbar = () => {
+  const [isOpen, setIsOpen] = useState(false)
+  const {user} = useUser()
+  const {openSignIn} = useClerk()
+  const navigate = useNavigate()
+  const {favouriteMovies} = useAppContext()
+  const location = useLocation();
+
+  const isActive = (path) => {
+    if (path === '/') return location.pathname === '/';
+    return location.pathname.startsWith(path);
+  }
+
+  return (
+    <div className='fixed top-0 left-0 z-50 w-full flex items-center justify-between px-6 md:px-16 lg:px-36 py-5'>
+      <Link to='/' className='max-md:flex-1'>
+        <img src={assets.brandLogo} alt="Movie-Hub" className='w-48 md:w-56 h-auto'/>
+      </Link>
+
+      {/* menu items */}
+      <div className={`max-md:absolute max-md:top-0 max-md:left-0 max-md:font-medium max-md:text-lg z-50 flex flex-col md:flex-row items-center max-md:justify-center gap-8 md:px-8 py-3 max-md:h-screen md:rounded-full nav-glass overflow-hidden transition-[width] duration-300 ${isOpen ? 'max-md:w-full' : 'max-md:w-0'}`}>
+      
+        <XIcon className='md:hidden absolute top-6 right-6 w-6 h-6 cursor-pointer' onClick={()=> setIsOpen(!isOpen)}/>
+
+        <Link className={`nav-link ${isActive('/') ? 'nav-link-active' : ''}`} onClick={()=> {scrollTo(0,0), setIsOpen(false)}
+        } to='/'>Home</Link>
+        <Link className={`nav-link ${isActive('/movies') ? 'nav-link-active' : ''}`} onClick={()=> {scrollTo(0,0), setIsOpen(false)}
+        } to='/movies'>Movies</Link>
+        <Link className={`nav-link ${isActive('/theaters') ? 'nav-link-active' : ''}`} onClick={()=> {scrollTo(0,0), setIsOpen(false)}
+        } to='/theaters'>Theaters</Link>
+        <Link className={`nav-link ${isActive('/releases') ? 'nav-link-active' : ''}`} onClick={()=> {scrollTo(0,0), setIsOpen(false)}
+        } to='/releases'>Releases</Link>
+        {favouriteMovies.length>0 && <Link className={`nav-link ${isActive('/favorite') ? 'nav-link-active' : ''}`} onClick={()=> {scrollTo(0,0);
+        setIsOpen(false)}} to='/favorite'>Favourites</Link>}
+      </div>
+
+      <div className='flex items-center gap-4'>
+  {/* Search icon removed per request */}
+        {
+          !user ? (
+              <button onClick={openSignIn} className='px-4 py-1 sm:px-7 sm:py-2 btn-neon font-medium cursor-pointer'>Login</button>
+          ) : (
+            <UserButton>
+              <UserButton.MenuItems>
+                <UserButton.Action label='My Booking' labelIcon={<TicketPlus width={15}/>} onClick={
+                  ()=> navigate('/my-bookings')
+                }/>
+              </UserButton.MenuItems>
+            </UserButton>
+          )
+          
+        }
+      </div>
+
+      <MenuIcon className=
+      'max-md:ml-4 md:hidden w-8 h-8 cursor-pointer' onClick={()=> setIsOpen(!isOpen)}/>
+    </div>
+  );
+};
+
+export default Navbar;
